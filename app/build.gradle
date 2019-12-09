@@ -1,0 +1,107 @@
+apply plugin: 'com.android.application'
+// 依赖插件脚本
+apply from: 'tinker-support.gradle'
+
+android {
+    signingConfigs {
+        config {
+            storeFile file('C:\\Users\\Heiduo\\heiduo.jks')
+            storePassword 'heiduo97'
+            keyAlias = 'key1'
+            keyPassword 'heiduo97T'
+        }
+    }
+    compileSdkVersion 28
+    buildToolsVersion "29.0.1"
+    defaultConfig {
+        applicationId "com.example.myapplication"
+        minSdkVersion 21
+        targetSdkVersion 26
+        versionCode 6
+        versionName "1.3.2"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        ndk {
+            //设置支持的SO库架构
+            abiFilters 'armeabi' //, 'x86', 'armeabi-v7a', 'x86_64', 'arm64-v8a'
+        }
+
+        manifestPlaceholders = [
+                JPUSH_PKGNAME : applicationId,
+                JPUSH_APPKEY : "d5bcc77a922857076802f0a0", //JPush 上注册的包名对应的 Appkey.
+                JPUSH_CHANNEL : "developer-default", //暂时填写默认值即可.
+        ]
+
+        /*android.applicationVariants.all {
+            variant ->
+                variant.outputs.all {
+                    outputFileName = "my_test5.apk"
+                }
+        }*/
+    }
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
+        }
+    }
+
+    /*signingConfigs{
+        config{
+            keyAlias 'key1'
+            keyPassword 'heiduo97'
+            storeFile file('C:\\Users\\Heiduo\\heiduo.jks')
+            storePassword 'heiduo97T'
+        }
+    }*/
+
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+
+    useLibrary 'org.apache.http.legacy'
+    compileOptions {
+        sourceCompatibility = '1.8'
+        targetCompatibility = '1.8'
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test:runner:1.2.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    implementation project(':MPChartLib') // 添加依赖模块
+    implementation 'com.scwang.smartrefresh:SmartRefreshLayout:1.1.0'//下拉刷新
+    implementation 'com.scwang.smartrefresh:SmartRefreshHeader:1.1.0'  //没有使用特殊Header，可以不加这行
+    implementation 'com.android.support:support-v4:28.0.0'
+
+    implementation 'cn.bmob.android:bmob-sdk:3.7.3-rc1'
+    implementation "io.reactivex.rxjava2:rxjava:2.2.4"
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
+    implementation 'com.squareup.okio:okio:2.1.0'
+    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'com.squareup.okhttp3:okhttp:3.12.1'
+    implementation 'cn.bmob.android:http-legacy:1.0'
+    implementation 'com.alibaba:fastjson:1.2.47'
+
+    //bugly
+    implementation "com.android.support:multidex:1.0.3" // 多dex配置
+    //注释掉原有bugly的仓库
+    //compile 'com.tencent.bugly:crashreport:latest.release'//其中latest.release指代最新版本号，也可以指定明确的版本号，例如1.3.4
+    implementation 'com.tencent.bugly:crashreport_upgrade:1.3.5'
+    // 指定tinker依赖版本（注：应用升级1.3.5版本起，不再内置tinker）
+    implementation 'com.tencent.tinker:tinker-android-lib:1.9.6'
+    implementation 'com.tencent.bugly:nativecrashreport:3.7.1' //其中latest.release指代最新版本号，也可以指定明确的版本号，例如2.2.0
+
+    //极光推送
+    implementation 'cn.jiguang.sdk:jpush:3.3.9'  // 此处以JPush 3.3.9 版本为例。
+    implementation 'cn.jiguang.sdk:jcore:2.1.6'  // 此处以JCore 2.1.6 版本为例。
+
+
+    implementation 'com.jakewharton:butterknife:10.0.0'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:10.0.0'
+}

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+
+    android:layout_height="match_parent">
+
+    <com.example.myapplication.view.RoundView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/tv1"
+            android:layout_width="@dimen/crystal_height"
+            android:layout_height="@dimen/crystal_height"
+            android:background="@color/colorAccent"
+            android:gravity="center"
+            android:text="1" />
+
+        <TextView
+            android:id="@+id/tv2"
+            android:layout_width="@dimen/crystal_height"
+            android:layout_height="@dimen/crystal_height"
+            android:background="@android:color/darker_gray"
+            android:gravity="center"
+            android:text="2" />
+
+        <TextView
+            android:id="@+id/tv3"
+            android:layout_width="@dimen/crystal_height"
+            android:layout_height="@dimen/crystal_height"
+            android:background="@android:color/holo_green_dark"
+            android:gravity="center"
+            android:text="3" />
+
+        <TextView
+            android:id="@+id/tv4"
+            android:layout_width="@dimen/crystal_height"
+            android:layout_height="@dimen/crystal_height"
+            android:background="@android:color/holo_blue_dark"
+            android:gravity="center"
+            android:text="4" />
+
+        <TextView
+            android:id="@+id/tv5"
+            android:layout_width="@dimen/crystal_height"
+            android:layout_height="@dimen/crystal_height"
+            android:background="@android:color/holo_green_light"
+            android:gravity="center"
+            android:text="5" />
+
+        <TextView
+            android:id="@+id/tv6"
+            android:layout_width="@dimen/crystal_height"
+            android:layout_height="@dimen/crystal_height"
+            android:background="@android:color/holo_orange_light"
+            android:gravity="center"
+            android:text="6" />
+
+        <TextView
+            android:id="@+id/tv7"
+            android:layout_width="@dimen/crystal_height"
+            android:layout_height="@dimen/crystal_height"
+            android:background="#ff3311"
+            android:gravity="center"
+            android:text="7" />
+
+        <ImageView
+            android:id="@+id/ivCenter"
+            android:layout_width="130dp"
+            android:layout_height="130dp"
+            android:src="@drawable/ic_launcher_background"
+            android:tag="center" />
+    </com.example.myapplication.view.RoundView>
+
+</LinearLayout>
