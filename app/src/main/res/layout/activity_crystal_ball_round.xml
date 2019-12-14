@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.example.myapplication.view.RoundView
+        android:id="@+id/rvCrystalBall"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <include
+            android:id="@+id/crystal_1"
+            layout="@layout/horizontal_list_item"
+            android:layout_width="@dimen/crystal_height"
+            android:layout_height="@dimen/crystal_height"
+           />
+        <include
+            android:id="@+id/crystal_2"
+            layout="@layout/horizontal_list_item"
+            android:layout_width="@dimen/crystal_height"
+            android:layout_height="@dimen/crystal_height"
+            />
+        <include
+            android:id="@+id/crystal_3"
+            layout="@layout/horizontal_list_item"
+            android:layout_width="@dimen/crystal_height"
+            android:layout_height="@dimen/crystal_height"
+            />
+        <include
+            android:id="@+id/crystal_4"
+            layout="@layout/horizontal_list_item"
+            android:layout_width="@dimen/crystal_height"
+            android:layout_height="@dimen/crystal_height"
+            />
+        <include
+            android:id="@+id/crystal_5"
+            layout="@layout/horizontal_list_item"
+            android:layout_width="@dimen/crystal_height"
+            android:layout_height="@dimen/crystal_height"
+            />
+        <include
+            android:id="@+id/crystal_6"
+            layout="@layout/horizontal_list_item"
+            android:layout_width="@dimen/crystal_height"
+            android:layout_height="@dimen/crystal_height"
+            />
+        <include
+            android:id="@+id/crystal_7"
+            layout="@layout/horizontal_list_item"
+            android:layout_width="@dimen/crystal_height"
+            android:layout_height="@dimen/crystal_height"
+            />
+
+
+        <!--<ImageView
+            android:id="@+id/imageView"
+            android:layout_width="260dp"
+            android:layout_height="260dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="60dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="20dp"
+            android:tag="center"
+            android:src="@mipmap/xuxian"/>-->
+    </com.example.myapplication.view.RoundView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

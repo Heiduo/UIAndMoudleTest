@@ -249,10 +249,10 @@ public class CrystalBallActivity extends WDActivity {
 
             Logger.d(TAG, "url:" + loadUrl);
             if (null != loadUrl && !"".equals(loadUrl)) {
-                webView.post(() -> {
+                /*webView.post(() -> {
                     webView.loadUrl(loadUrl);
 //                    webView.loadData("<html>" + "<iframe src=\"https://blog.csdn.net/weixin_45574883/rss/list\" width=\"100%\" height=\"99%\"></iframe>" + "</html>", "text/html", "utf-8");
-                });
+                });*/
 //                webView.loadUrl(loadUrl);
             }
         } catch (Exception e) {

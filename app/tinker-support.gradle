@@ -13,7 +13,15 @@ def baseApkDir = "app-1114-11-18-34"
 tinkerSupport {
 
     // 开启tinker-support插件，默认值true
-    enable = true
+//    enable = true
+//开发者模式下，关闭插件
+    def sp = project.gradle.startParameter
+    def taskName = sp.taskNames[0]
+    def isopenthinker = true
+    if (taskName == ":app:assembleDebug") {
+        isopenthinker = false
+    }
+    enable = isopenthinker   //开启tinker-support插件，默认值true
 
     // 指定归档目录，默认值当前module的子目录tinker
     autoBackupApkDir = "${bakPath}"
@@ -57,6 +65,18 @@ tinkerSupport {
  * https://github.com/Tencent/tinker/wiki/Tinker-%E6%8E%A5%E5%85%A5%E6%8C%87%E5%8D%97
  */
 tinkerPatch {
+    //我们要完全关闭热更新，还需要在tinkerPatch 将tinkerEnable 设置为false才可以
+    //开发者模式下，关闭插件
+    def sp = project.gradle.startParameter
+    def taskName = sp.taskNames[0]
+    def isopenthinker = true
+    /*  logger.quiet("开始")
+      logger.quiet(taskName+"")
+      logger.error('error 日志')*/
+    if (taskName == ":app:assembleDebug") {
+        isopenthinker = false
+    }
+    tinkerEnable = isopenthinker
     //oldApk ="${bakPath}/${appName}/app-release.apk"
     ignoreWarning = false
     useSign = true

@@ -1,5 +1,7 @@
 package com.example.myapplication;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
@@ -24,39 +26,27 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
-import android.transition.Fade;
-import android.transition.Slide;
-import android.transition.TransitionInflater;
 import android.util.Log;
 import android.view.View;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSONObject;
+import com.example.myapplication.CrystalBall.CrystalBallTrueActivity;
 import com.example.myapplication.Transition.FadeActivity;
-import com.example.myapplication.Transition.SlideActivity;
 import com.example.myapplication.view.DataBean;
-import com.example.myapplication.view.DataBeanResult;
 import com.example.myapplication.view.RoundActivity;
-import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.LimitLine;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
-import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
-import com.github.mikephil.charting.formatter.ValueFormatter;
-import com.google.gson.Gson;
-import com.tencent.bugly.beta.Beta;
+import com.parry.zxing.activity.CaptureActivity;
+import com.parry.zxing.activity.CodeUtils;
 
-import org.json.JSONException;
-
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.SimpleDateFormat;
@@ -68,17 +58,18 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity {
+import butterknife.OnClick;
+
+public class MainActivity extends WDActivity {
     public static final String TAG = "main";
+    public static final int REQUEST_CAMERA = 101;
+    public static final int REQUEST_CAPTURE = 102;
     LineChart lineChart;
     TextView tvNotification;
     TextView tvCheckUpdate;
 
     TextView tvSystemTime;
     TextView tvCurrentTime;
-
-    TextView tvFade;
-    TextView tvSlide;
 
     BluetoothAdapter bluetoothAdapter = null;
 
@@ -106,18 +97,22 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         //设置退出动画
         setupWindowAnimations();
-
-        setContentView(R.layout.activity_main);
-
         init();
-        initView();
+
+    }
+
+    @Override
+    protected int getLayoutId() {
+        return R.layout.activity_main;
     }
 
     private void init() {
         manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
     }
 
-    private void initView() {
+    @Override
+    public void initView() {
+        setBarStatusColor(true);
         //获取版本号
         Log.d(TAG,"版本code ：" + getVersionCode(this) + ", 版本名：" + getVersionName(this));
         //手机系统版本 型号 厂商
@@ -313,6 +308,68 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+    }
+
+    @OnClick({R.id.tvSystemTime,R.id.swTest})
+    public void onMainClick(View view){
+        switch (view.getId()){
+            case R.id.tvSystemTime:
+//                intent(CrystalBallTrueActivity.class);
+                if (ContextCompat.checkSelfPermission(MainActivity.this,Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
+                    ActivityCompat.requestPermissions(MainActivity.this,new String[]{Manifest.permission.CAMERA},REQUEST_CAMERA);
+                }else {
+                    goScanQRCode();
+                }
+                break;
+            case R.id.swTest:
+                /*if (ContextCompat.checkSelfPermission(MainActivity.this,Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
+                    ActivityCompat.requestPermissions(MainActivity.this,new String[]{Manifest.permission.CAMERA},REQUEST_CAMERA);
+                }else {
+                    goScanQRCode();
+                }*/
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     *扫描二维码
+     */
+    private void goScanQRCode() {
+        Intent intent = new Intent(MainActivity.this, CaptureActivity.class);
+        startActivityForResult(intent,REQUEST_CAPTURE);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_CAPTURE){
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                goScanQRCode();
+                Logger.d(TAG,"相机权限授予成功");
+            }else {
+                Toast.makeText(this,"权限拒绝",Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CAPTURE){
+            if (null!=data){
+                Bundle bundle = data.getExtras();
+                if (bundle == null){
+                    return;
+                }
+                if (bundle.getInt(CodeUtils.RESULT_TYPE) == CodeUtils.RESULT_SUCCESS){
+                    Toast.makeText(this,bundle.getString(CodeUtils.RESULT_STRING),Toast.LENGTH_SHORT).show();
+                }else if (bundle.getInt(CodeUtils.RESULT_TYPE) == CodeUtils.RESULT_FAILED){
+                    Toast.makeText(this, "解析二维码失败", Toast.LENGTH_LONG).show();
+                }
+            }
+        }
     }
 
     private void setupWindowAnimations(){

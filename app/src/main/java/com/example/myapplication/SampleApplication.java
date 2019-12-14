@@ -7,6 +7,7 @@ import android.util.Log;
 
 import androidx.multidex.MultiDex;
 
+import com.parry.zxing.activity.ZXingLibrary;
 import com.tencent.bugly.Bugly;
 import com.tencent.bugly.beta.Beta;
 import com.tencent.bugly.beta.interfaces.BetaPatchListener;
@@ -77,6 +78,8 @@ public class SampleApplication extends TinkerApplication implements BetaPatchLis
         Beta.installTinker();
 
         Beta.betaPatchListener = this;
+
+        ZXingLibrary.initDisplayOpinion(this);
     }
 
     /**

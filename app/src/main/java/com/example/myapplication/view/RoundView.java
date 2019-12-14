@@ -3,12 +3,17 @@ package com.example.myapplication.view;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Camera;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -27,7 +32,7 @@ import java.util.List;
  */
 public class RoundView extends FrameLayout {
     //从这个角度开始画View
-    private static final float START_ANGLE = 270f;
+    private static final float START_ANGLE = 90f;
 
     //父容器的边界 单位dp
     private static final int PADDING = 80;
@@ -50,6 +55,12 @@ public class RoundView extends FrameLayout {
      */
     private int mPadding;
 
+    /**
+     * 摄像头
+     */
+    private Camera mCamera;
+    private Paint mPaint;
+
     //自动旋转角度，16ms(一帧）旋转的角度，值越大，旋转越快
     private static final float AUTO_SWEEP_ANGLE = 0.3f;
 
@@ -69,6 +80,7 @@ public class RoundView extends FrameLayout {
     public RoundView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         mPadding = (int) (context.getResources().getDisplayMetrics().density * PADDING);
+        mCamera =  new  Camera();
         initAnim();
     }
 
@@ -88,8 +100,31 @@ public class RoundView extends FrameLayout {
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
 //        super.onLayout(changed, left, top, right, bottom);
         mRadius = getMeasuredWidth() / 2f - mPadding;
+        mPaint = new Paint();
         layoutChildren();
         postDelayed(autoScrollRunnable,100);
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+/*
+        int childCount = getChildCount();
+        if (childCount == 0){
+            return;
+        }
+        for (int index = 0; index < childCount; index++) {
+            View child = getChildAt(index);
+            int childWidth = child.getMeasuredWidth();
+            int childHeight = child.getMeasuredHeight();
+
+            if ("center".equals(child.getTag())) {
+                Matrix matrix =((ImageView) child).getImageMatrix();
+
+                child = (ImageView)child;
+                canvas.drawBitmap(child,matrix,mPaint);
+            }
+        }*/
     }
 
     private void layoutChildren() {
@@ -118,6 +153,27 @@ public class RoundView extends FrameLayout {
                 //居中显示
                 child.layout(getMeasuredWidth() / 2 - childWidth / 2, getMeasuredHeight() / 2 - childHeight / 2,
                         getMeasuredWidth() / 2 + childWidth / 2, getMeasuredHeight() / 2 + childHeight / 2);
+
+                final Camera camera = mCamera;
+
+                /*final Matrix matrix = (ImageView)child.getImageMatrix();
+
+                camera.save();
+
+
+                    camera.translate( 0.0f,  0.0f, mDepthZ * interpolatedTime);
+
+                //绕Y周旋转
+                camera.rotateY(degrees);
+
+                //取得变换后的矩阵
+                camera.getMatrix(matrix);
+                camera.restore();*/
+
+                //绕中心旋转
+                child.setRotation(sweepAngle);
+//                child.setRotationY(sweepAngle);
+
             } else {
                 //第index 子View的角度
                 double angle = (START_ANGLE - averageAngle * number + sweepAngle) * Math.PI / 180;
@@ -140,9 +196,6 @@ public class RoundView extends FrameLayout {
                     child.setScaleY(scale);
 
                 }
-
-
-
                 number++;
             }
 
@@ -214,6 +267,8 @@ public class RoundView extends FrameLayout {
             }
         });
     }
+
+
 
     /**
      * 手势处理

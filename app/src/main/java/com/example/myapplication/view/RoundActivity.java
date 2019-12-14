@@ -46,6 +46,7 @@ public class RoundActivity extends WDActivity {
                 Logger.e(TAG,"click");
                 break;
             default:
+
                 break;
         }
     }

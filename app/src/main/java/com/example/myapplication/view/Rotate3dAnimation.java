@@ -24,6 +24,16 @@ public class Rotate3dAnimation extends Animation {
     private   final   boolean  mReverse;
     //摄像头
     private  Camera mCamera;
+
+    /**
+     * 创建一个绕Y轴旋转的3D动画效果，旋转过程具有深度调节，可以指定旋转中心
+     * @param fromDegrees 起始角度
+     * @param toDegrees 结束角度
+     * @param centerX 旋转中心x坐标
+     * @param centerY 旋转中心y坐标
+     * @param depthZ 最远达到的z轴坐标
+     * @param reverse true表示由0到depthZ，false相反
+     */
     public  Rotate3dAnimation( float  fromDegrees,  float  toDegrees,
                                float  centerX,  float  centerY,  float  depthZ,  boolean  reverse) {
         mFromDegrees = fromDegrees;
@@ -53,16 +63,21 @@ public class Rotate3dAnimation extends Animation {
         final Matrix matrix = t.getMatrix();
 
         camera.save();
+
+        //调节深度
         if  (mReverse) {
             camera.translate( 0.0f,  0.0f, mDepthZ * interpolatedTime);
         }  else  {
             camera.translate( 0.0f,  0.0f, mDepthZ * ( 1.0f - interpolatedTime));
         }
+        //绕Y周旋转
         camera.rotateY(degrees);
+
         //取得变换后的矩阵
         camera.getMatrix(matrix);
         camera.restore();
 
+        //调节中心点
         matrix.preTranslate(-centerX, -centerY);
         matrix.postTranslate(centerX, centerY);
     }
