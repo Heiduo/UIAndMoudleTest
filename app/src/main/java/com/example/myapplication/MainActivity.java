@@ -2,7 +2,6 @@ package com.example.myapplication;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
@@ -32,8 +31,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSONObject;
-import com.example.myapplication.CrystalBall.CrystalBallTrueActivity;
 import com.example.myapplication.Transition.FadeActivity;
+import com.example.myapplication.core.WDActivity;
+import com.example.myapplication.utils.Logger;
 import com.example.myapplication.view.DataBean;
 import com.example.myapplication.view.RoundActivity;
 import com.github.mikephil.charting.charts.LineChart;
@@ -44,6 +44,7 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
+import com.heiduo.ts.testlib.TestUtils;
 import com.parry.zxing.activity.CaptureActivity;
 import com.parry.zxing.activity.CodeUtils;
 
@@ -53,10 +54,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import butterknife.OnClick;
 
@@ -120,6 +119,7 @@ public class MainActivity extends WDActivity {
                 + "\n手机型号：" + getDeviceBrand()+ " " + getSystemModel());
 
         SharedPreferences shared = getSharedPreferences("share.xml",MODE_PRIVATE);
+        Log.d(TAG,"TestUtils：" + TestUtils.getTest());
 
         DataBean dataBean =  new DataBean("test","code",true);
         String data = JSONObject.toJSONString(dataBean);

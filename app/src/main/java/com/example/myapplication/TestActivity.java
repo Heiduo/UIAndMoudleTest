@@ -10,7 +10,8 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.tencent.bugly.crashreport.CrashReport;
+import com.example.myapplication.core.SampleApplication;
+import com.example.myapplication.utils.Logger;
 
 /**
  * 描述：

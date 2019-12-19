@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package com.example.myapplication.core;
 
 import android.content.Context;
 import android.content.Intent;
@@ -7,6 +7,7 @@ import android.util.Log;
 
 import androidx.multidex.MultiDex;
 
+import com.example.myapplication.MainActivity;
 import com.parry.zxing.activity.ZXingLibrary;
 import com.tencent.bugly.Bugly;
 import com.tencent.bugly.beta.Beta;
@@ -14,6 +15,7 @@ import com.tencent.bugly.beta.interfaces.BetaPatchListener;
 import com.tencent.tinker.loader.app.TinkerApplication;
 import com.tencent.tinker.loader.shareutil.ShareConstants;
 
+import cn.bmob.v3.Bmob;
 import cn.jpush.android.api.JPushInterface;
 
 /**
@@ -29,7 +31,7 @@ public class SampleApplication extends TinkerApplication implements BetaPatchLis
     private static Handler mMainThreadHandler;
 
     public SampleApplication() {
-        super(ShareConstants.TINKER_ENABLE_ALL, "com.example.myapplication.SampleApplicationLike",
+        super(ShareConstants.TINKER_ENABLE_ALL, "com.example.myapplication.core.SampleApplicationLike",
                 "com.tencent.tinker.loader.TinkerLoader", false);
     }
     protected SampleApplication(int tinkerFlags) {
@@ -60,6 +62,8 @@ public class SampleApplication extends TinkerApplication implements BetaPatchLis
         Beta.initDelay = 3 *1000;
 
         Log.d("simple application","onCreate");
+
+        Bmob.initialize(this,"aafe4282cf8d96dbee2d58d12a9e9451");
 
 //        JPushInterface.setDebugMode(true);
 //        JPushInterface.init(this);     		// 初始化 JPush

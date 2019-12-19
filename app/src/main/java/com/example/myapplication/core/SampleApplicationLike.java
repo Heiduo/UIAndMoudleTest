@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package com.example.myapplication.core;
 
 import android.annotation.TargetApi;
 import android.app.Application;

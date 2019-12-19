@@ -4,9 +4,9 @@ import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.ImageView;
 
-import com.example.myapplication.Logger;
+import com.example.myapplication.utils.Logger;
 import com.example.myapplication.R;
-import com.example.myapplication.WDActivity;
+import com.example.myapplication.core.WDActivity;
 
 import butterknife.BindView;
 import butterknife.OnClick;

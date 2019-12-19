@@ -1,11 +1,7 @@
 package com.example.myapplication.CrystalBall;
 
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.TextView;
-
 import com.example.myapplication.R;
-import com.example.myapplication.WDActivity;
+import com.example.myapplication.core.WDActivity;
 
 /**
  * 描述：
