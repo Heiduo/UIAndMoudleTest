@@ -26,6 +26,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,6 +35,7 @@ import android.widget.Toast;
 import com.alibaba.fastjson.JSONObject;
 import com.example.myapplication.Transition.FadeActivity;
 import com.example.myapplication.core.WDActivity;
+import com.example.myapplication.utils.HDPopWindow;
 import com.example.myapplication.utils.Logger;
 import com.example.myapplication.view.DataBean;
 import com.example.myapplication.view.RoundActivity;
@@ -44,7 +47,6 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
-import com.heiduo.ts.testlib.TestUtils;
 import com.parry.zxing.activity.CaptureActivity;
 import com.parry.zxing.activity.CodeUtils;
 
@@ -119,7 +121,6 @@ public class MainActivity extends WDActivity {
                 + "\n手机型号：" + getDeviceBrand()+ " " + getSystemModel());
 
         SharedPreferences shared = getSharedPreferences("share.xml",MODE_PRIVATE);
-        Log.d(TAG,"TestUtils：" + TestUtils.getTest());
 
         DataBean dataBean =  new DataBean("test","code",true);
         String data = JSONObject.toJSONString(dataBean);
@@ -310,7 +311,7 @@ public class MainActivity extends WDActivity {
 
     }
 
-    @OnClick({R.id.tvSystemTime,R.id.swTest})
+    @OnClick({R.id.tvSystemTime,R.id.swTest,R.id.ivBack})
     public void onMainClick(View view){
         switch (view.getId()){
             case R.id.tvSystemTime:
@@ -327,6 +328,18 @@ public class MainActivity extends WDActivity {
                 }else {
                     goScanQRCode();
                 }*/
+                break;
+            case R.id.ivBack:
+                View viewPop = LayoutInflater.from(this).inflate(R.layout.fl_first,null);
+
+                HDPopWindow popWindow = new HDPopWindow.PopupWindowBuilder(this)
+                        .setView(viewPop)
+                        .setFocusable(true)
+                        .create();
+
+                viewPop.setOnClickListener(v -> popWindow.dismiss());
+
+                popWindow.showAsDropDown(lineChart,0,10);
                 break;
             default:
                 break;
