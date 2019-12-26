@@ -115,6 +115,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <Button
+        android:id="@+id/btCanvas2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="50dp"
+        android:text="Canvas"
+        app:layout_constraintStart_toEndOf="@+id/swTest"
+        app:layout_constraintTop_toTopOf="@+id/swTest"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="200dp"

@@ -64,6 +64,7 @@
         <activity android:name=".CrystalBallActivity"/>
         <activity android:name=".view.RoundActivity"/>
         <activity android:name=".CrystalBall.CrystalBallTrueActivity"/>
+        <activity android:name=".activity.Canvas2Activity"/>
 
 
         <!-- Required since 3.0.7 -->

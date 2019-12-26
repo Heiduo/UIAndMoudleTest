@@ -34,6 +34,7 @@ import android.widget.Toast;
 
 import com.alibaba.fastjson.JSONObject;
 import com.example.myapplication.Transition.FadeActivity;
+import com.example.myapplication.activity.Canvas2Activity;
 import com.example.myapplication.core.WDActivity;
 import com.example.myapplication.utils.HDPopWindow;
 import com.example.myapplication.utils.Logger;
@@ -311,7 +312,9 @@ public class MainActivity extends WDActivity {
 
     }
 
-    @OnClick({R.id.tvSystemTime,R.id.swTest,R.id.ivBack})
+    HDPopWindow popWindow;
+    View viewPop;
+    @OnClick({R.id.tvSystemTime,R.id.swTest,R.id.ivBack,R.id.btCanvas2})
     public void onMainClick(View view){
         switch (view.getId()){
             case R.id.tvSystemTime:
@@ -330,16 +333,29 @@ public class MainActivity extends WDActivity {
                 }*/
                 break;
             case R.id.ivBack:
-                View viewPop = LayoutInflater.from(this).inflate(R.layout.fl_first,null);
+                if (viewPop == null){
+                    viewPop = LayoutInflater.from(this).inflate(R.layout.fl_first,null);
+                    /*viewPop.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            popWindow.dismiss();
+                        }
+                    });*/
+                }
+                if (popWindow==null){
+                    popWindow = new HDPopWindow.PopupWindowBuilder(this)
+                            .setView(viewPop)
+                            .create();
+                }
 
-                HDPopWindow popWindow = new HDPopWindow.PopupWindowBuilder(this)
-                        .setView(viewPop)
-                        .setFocusable(true)
-                        .create();
 
-                viewPop.setOnClickListener(v -> popWindow.dismiss());
+
+//                viewPop.setOnClickListener(v -> popWindow.dismiss());
 
                 popWindow.showAsDropDown(lineChart,0,10);
+                break;
+            case R.id.btCanvas2:
+                intent(Canvas2Activity.class);
                 break;
             default:
                 break;
