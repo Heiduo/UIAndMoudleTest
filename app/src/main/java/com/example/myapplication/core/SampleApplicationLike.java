@@ -5,6 +5,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Environment;
 import android.util.Log;
 
 import androidx.multidex.MultiDex;
@@ -35,9 +36,20 @@ public class SampleApplicationLike extends DefaultApplicationLike {
     @Override
     public void onCreate() {
         super.onCreate();
+
+
+//        Beta.autoInit = true;//自动初始化
+        Beta.autoCheckUpgrade = false;//自动检查更新
+//        Beta.upgradeCheckPeriod = 60 *1000;//检查更新周期
+        Beta.initDelay = 3 *1000;
+        Beta.autoDownloadOnWifi = true;
+//        Beta.checkUpgrade(true,true);
+        Beta.showInterruptedStrategy = true;
+        Beta.storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+
         // 这里实现SDK初始化，appId替换成你的在Bugly平台申请的appId
         // 调试时，将第三个参数改为true
-//        Bugly.init(getApplication(), "850a3b0cc5", true);
+        Bugly.init(getApplication(), "850a3b0cc5", true);
 //        CrashReport.initCrashReport(getApplicationContext(), "850a3b0cc5", false);
         Log.d("simple applicationLink","onCreate");
 

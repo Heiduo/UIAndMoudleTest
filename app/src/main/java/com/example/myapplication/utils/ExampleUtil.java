@@ -73,7 +73,7 @@ public class ExampleUtil {
     }
 
     // 取得版本号
-    public static String GetVersion(Context context) {
+    public static String getVersion(Context context) {
 		try {
 			PackageInfo manager = context.getPackageManager().getPackageInfo(
 					context.getPackageName(), 0);
@@ -82,6 +82,22 @@ public class ExampleUtil {
 			return "Unknown";
 		}
 	}
+
+    /**
+     * 获取版本code
+     *
+     * @param context
+     * @return
+     */
+    public static int getVersionCode(Context context) {
+        try {
+            PackageInfo pi = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            return pi.versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
 
     public static void showToast(final String toast, final Context context)
     {

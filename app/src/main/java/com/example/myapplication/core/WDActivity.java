@@ -23,6 +23,12 @@ import butterknife.ButterKnife;
  */
 public abstract class WDActivity extends AppCompatActivity {
     protected final String TAG = getClass().getSimpleName();
+
+    /**
+     * 记录处于前台的Activity
+     */
+    private static WDActivity mForegroundActivity = null;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,6 +37,12 @@ public abstract class WDActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         initBarStatus();
         initView();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mForegroundActivity = this;
     }
 
     public void setBarStatusColor(boolean color){
@@ -75,5 +87,12 @@ public abstract class WDActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
 
+    }
+
+    /**
+     * 获取当前处于前台的activity
+     */
+    public static WDActivity getForegroundActivity() {
+        return mForegroundActivity;
     }
 }

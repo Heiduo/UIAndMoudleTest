@@ -2,6 +2,7 @@ package com.example.myapplication;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
@@ -33,11 +34,20 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSONObject;
+import com.example.myapplication.Bean.Constants;
+import com.example.myapplication.Bean.CustomEvent;
 import com.example.myapplication.Transition.FadeActivity;
 import com.example.myapplication.activity.Canvas2Activity;
+import com.example.myapplication.core.SampleApplication;
 import com.example.myapplication.core.WDActivity;
+import com.example.myapplication.service.DownloadService;
+import com.example.myapplication.utils.ApkController;
+import com.example.myapplication.utils.DownlodUtils;
+import com.example.myapplication.utils.ExampleUtil;
 import com.example.myapplication.utils.HDPopWindow;
 import com.example.myapplication.utils.Logger;
+import com.example.myapplication.utils.StringUtils;
+import com.example.myapplication.utils.UIUtils;
 import com.example.myapplication.view.DataBean;
 import com.example.myapplication.view.RoundActivity;
 import com.github.mikephil.charting.charts.LineChart;
@@ -50,7 +60,13 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.parry.zxing.activity.CaptureActivity;
 import com.parry.zxing.activity.CodeUtils;
+import com.tencent.bugly.beta.Beta;
+import com.tencent.bugly.beta.UpgradeInfo;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
+import java.io.File;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.SimpleDateFormat;
@@ -66,6 +82,7 @@ public class MainActivity extends WDActivity {
     public static final String TAG = "main";
     public static final int REQUEST_CAMERA = 101;
     public static final int REQUEST_CAPTURE = 102;
+    private boolean installing = false;
     LineChart lineChart;
     TextView tvNotification;
     TextView tvCheckUpdate;
@@ -85,15 +102,16 @@ public class MainActivity extends WDActivity {
     Calendar calendar;
     long timeDifference;
 
-    private Handler handler = new Handler(){
+    private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             long time2 = (long) msg.obj;
             tvCurrentTime.setText(format.format(new Date(time2)));
-            Logger.e(TAG,"date2:" + format.format(new Date(time2)));
+            Logger.e(TAG, "date2:" + format.format(new Date(time2)));
         }
     };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,6 +119,40 @@ public class MainActivity extends WDActivity {
         setupWindowAnimations();
         init();
 
+
+    }
+
+    private void installApk(String path) {
+        if (!StringUtils.isEmpty(path)) {
+            File file = new File(path);
+            if (file.exists()){
+                if (!installing) {
+                    installing = true;
+                    new Thread(){
+                        @Override
+                        public void run() {
+                            ApkController.install(path, MainActivity.this);
+                        }
+                    }.start();
+                }
+            }else {
+                UIUtils.showToastSafe("未找到安装文件");
+            }
+        } else {
+            UIUtils.showToastSafe("未找到安装文件");
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -116,21 +168,21 @@ public class MainActivity extends WDActivity {
     public void initView() {
         setBarStatusColor(true);
         //获取版本号
-        Log.d(TAG,"版本code ：" + getVersionCode(this) + ", 版本名：" + getVersionName(this));
+        Log.d(TAG, "版本code ：" + getVersionCode(this) + ", 版本名：" + getVersionName(this));
         //手机系统版本 型号 厂商
-        Log.d(TAG,"系统版本：" + getSystemVersion()
-                + "\n手机型号：" + getDeviceBrand()+ " " + getSystemModel());
+        Log.d(TAG, "系统版本：" + getSystemVersion()
+                + "\n手机型号：" + getDeviceBrand() + " " + getSystemModel());
 
-        SharedPreferences shared = getSharedPreferences("share.xml",MODE_PRIVATE);
+        SharedPreferences shared = getSharedPreferences("share.xml", MODE_PRIVATE);
 
-        DataBean dataBean =  new DataBean("test","code",true);
+        DataBean dataBean = new DataBean("test", "code", true);
         String data = JSONObject.toJSONString(dataBean);
-        Logger.e(TAG,"data0:" + data);
-        shared.edit().putString("data",data).commit();
-        String data2 = shared.getString("data","");
-        Logger.e(TAG,"data1:" + data2);
-        DataBean dataBean1 = JSONObject.parseObject(data2,DataBean.class);
-        Logger.e(TAG,"data2:" + dataBean1.toString());
+        Logger.e(TAG, "data0:" + data);
+        shared.edit().putString("data", data).commit();
+        String data2 = shared.getString("data", "");
+        Logger.e(TAG, "data1:" + data2);
+        DataBean dataBean1 = JSONObject.parseObject(data2, DataBean.class);
+        Logger.e(TAG, "data2:" + dataBean1.toString());
 
         tvNotification = findViewById(R.id.tvNotification);
         tvCheckUpdate = findViewById(R.id.tvCheckUpdate);
@@ -138,21 +190,21 @@ public class MainActivity extends WDActivity {
             @Override
             public void onClick(View view) {
                 count++;
-                Intent intent = new Intent(MainActivity.this,TestActivity.class);//通知跳转测试
-                intent.putExtra("test","通知内容");
+                Intent intent = new Intent(MainActivity.this, TestActivity.class);//通知跳转测试
+                intent.putExtra("test", "通知内容");
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                PendingIntent pi = PendingIntent.getActivity(MainActivity.this,0,intent,PendingIntent.FLAG_CANCEL_CURRENT);
-                NotificationCompat.Builder notify = new NotificationCompat.Builder(MainActivity.this ,"1");
+                PendingIntent pi = PendingIntent.getActivity(MainActivity.this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+                NotificationCompat.Builder notify = new NotificationCompat.Builder(MainActivity.this, "1");
                 notify.setContentTitle("通知测试")  //标题
                         .setContentText("通知内容") //内容
                         .setWhen(System.currentTimeMillis()) //设置时间
                         .setSmallIcon(R.mipmap.ic_launcher) //
-                        .setLargeIcon(BitmapFactory.decodeResource(getResources(),R.mipmap.ic_launcher_round))
+                        .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher_round))
                         .setContentIntent(pi)//设置点击事件
                         .setCategory(NotificationCompat.CATEGORY_MESSAGE)
                         .setVisibility(Notification.VISIBILITY_PRIVATE)
                         .setAutoCancel(true);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){//8.0以上需要添加通知渠道
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {//8.0以上需要添加通知渠道
                     String channelID = "1";
                     String channelName = "通知测试";
                     NotificationChannel channel = new NotificationChannel(channelID, channelName, NotificationManager.IMPORTANCE_DEFAULT);
@@ -161,7 +213,7 @@ public class MainActivity extends WDActivity {
                     notify.setChannelId(channelID);
                 }
 
-                manager.notify(count,notify.build());
+                manager.notify(count, notify.build());
                 tvNotification.setText(tvNotification.getText().toString() + count);
             }
         });
@@ -170,9 +222,31 @@ public class MainActivity extends WDActivity {
         bluetoothAdapter = manager.getAdapter();
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED){
+                != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(MainActivity.this,
-                    new String[]{/*Manifest.permission.ACCESS_COARSE_LOCATION,*/Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+                    new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}
+                    , 1);
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission
+                (this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE}, 2);
+        }else {
+            String name = SampleApplication.getShare().getString(DownloadService.APK_NAME, "");
+//            name = "1.3.3";
+            if (!StringUtils.isEmpty(name)) {
+                Logger.e(TAG, "DOWNLOAD_APK_NAME:" + name);
+                String now_name = ExampleUtil.getVersion(MainActivity.this);
+                if (name.compareTo(now_name) > 0) {
+                    String path = SampleApplication.getShare().getString(DownloadService.APK_PATH, "");
+                    Logger.e(TAG, "DOWNLOAD_APK_PATH:" + path);
+
+                    installApk(path);
+                }
+            }
+
         }
 
         /*if (!bluetoothAdapter.isEnabled()){
@@ -182,13 +256,16 @@ public class MainActivity extends WDActivity {
             bluetoothAdapter.disable();
         }*/
 
+        tvCheckUpdate.setText(ExampleUtil.getVersion(MainActivity.this));
+
+
         tvCheckUpdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 //                Beta.checkUpgrade();
-                Log.d("main","check update");
+                Log.d("main", "check update");
 
-                if (!bluetoothAdapter.isEnabled()){
+                /*if (!bluetoothAdapter.isEnabled()){
                     bluetoothAdapter.enable();
                     Toast.makeText(MainActivity.this,"open",Toast.LENGTH_SHORT).show();
 
@@ -196,7 +273,8 @@ public class MainActivity extends WDActivity {
                     bluetoothAdapter.disable();
                     Toast.makeText(MainActivity.this,"close",Toast.LENGTH_SHORT).show();
 
-                }
+                }*/
+                Beta.checkUpgrade(false, true);
 
             }
         });
@@ -206,19 +284,19 @@ public class MainActivity extends WDActivity {
         lineChart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this,CanvasActivity.class);
+                Intent intent = new Intent(MainActivity.this, CanvasActivity.class);
                 startActivity(intent);
             }
         });
         List<Entry> entries = new ArrayList<>();
-        String []label = new String[12];
+        String[] label = new String[12];
         final List<Float> xAxisValue = new ArrayList<>();
-        for (int i = 0 ;i<12;i++){
+        for (int i = 0; i < 12; i++) {
             xAxisValue.add((float) i);
-            entries.add(new Entry(i,i));
+            entries.add(new Entry(i, i));
             label[i] = String.valueOf(i);
         }
-        LineDataSet dataSet = new LineDataSet(entries," ");
+        LineDataSet dataSet = new LineDataSet(entries, " ");
         dataSet.setMode(LineDataSet.Mode.LINEAR_DISCONNECT_ZERO);
 
         XAxis xAxis = lineChart.getXAxis();//横轴设置
@@ -234,7 +312,7 @@ public class MainActivity extends WDActivity {
 
 
         YAxis rightAxis = lineChart.getAxisRight();
-        LimitLine limitLine = new LimitLine(5,  "label");
+        LimitLine limitLine = new LimitLine(5, "label");
         limitLine.setTextColor(Color.parseColor("#ffffff"));
         limitLine.setTextSize(12f);
         //限制线颜色
@@ -258,12 +336,32 @@ public class MainActivity extends WDActivity {
         });
 
 
-
         findViewById(R.id.tvSlide).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, CrystalBallActivity.class);
-                startActivity(intent);
+                /*Intent intent = new Intent(MainActivity.this, CrystalBallActivity.class);
+                startActivity(intent);*/
+                /**** 获取升级信息 ****/
+                UpgradeInfo upgradeInfo = Beta.getUpgradeInfo();
+                if (upgradeInfo == null) {
+                    Toast.makeText(MainActivity.this, "无可用升级信息", Toast.LENGTH_LONG).show();
+                    Logger.d(TAG, "无可用升级信息");
+                    return;
+                }
+                UIUtils.showToastSafe("upgrade:" + upgradeInfo.versionName + ", " + upgradeInfo.apkUrl);
+                Logger.d(TAG, "upgrade:" + upgradeInfo.versionName + ", " + upgradeInfo.apkUrl);
+                if (upgradeInfo.versionCode > ExampleUtil.getVersionCode(MainActivity.this)
+                        && !DownloadService.isDownloadApk()
+                        && !installing) {
+                    Intent intent = new Intent(MainActivity.this, DownloadService.class);
+                    intent.putExtra(DownloadService.DOWNLOAD_TYPE, DownloadService.DOWNLOAD_APK);
+                    intent.putExtra(DownloadService.APK_URL, upgradeInfo.apkUrl);
+                    intent.putExtra(DownloadService.APK_NAME, upgradeInfo.versionName);
+                    startService(intent);
+                } else {
+                    Logger.d(TAG, "code:" + ExampleUtil.getVersionCode(MainActivity.this)
+                            + ",isDown:" + DownloadService.isDownloadApk() + ", isInstalling:" + installing);
+                }
 //                Toast.makeText(MainActivity.this,"bugly热更新成功了！！啪啪啪",Toast.LENGTH_SHORT).show();
             }
         });
@@ -275,13 +373,13 @@ public class MainActivity extends WDActivity {
 
         calendar = (Calendar) Calendar.getInstance().clone();
 
-        findViewById(R.id.tvSystem).setOnClickListener(v->{
+        findViewById(R.id.tvSystem).setOnClickListener(v -> {
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             long time1 = Calendar.getInstance().getTimeInMillis();
             String date1 = format.format(new Date(time1));
-            Logger.e(TAG,"date1:" + date1);
+            Logger.e(TAG, "date1:" + date1);
             tvSystemTime.setText(date1);
-            new Thread(){
+            new Thread() {
                 @Override
                 public void run() {
                     long time2 = getNetworkTime();
@@ -291,21 +389,21 @@ public class MainActivity extends WDActivity {
                     msg.what = 1;
                     msg.obj = time2;
                     handler.sendMessage(msg);
-                    Logger.e(TAG,"thread ID:" + this.getId());
+                    Logger.e(TAG, "thread ID:" + this.getId());
                     try {
-                        sleep(6*1000);
+                        sleep(6 * 1000);
                         String date2 = format.format(new Date(Calendar.getInstance().getTimeInMillis() + timeDifference));
-                        Logger.e(TAG,"date3:" + date2);
+                        Logger.e(TAG, "date3:" + date2);
 
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
             }.start();
-            Logger.e(TAG,"thread ID0:" + Process.myPid());
+            Logger.e(TAG, "thread ID0:" + Process.myPid());
         });
 
-        findViewById(R.id.tvNetworkTime).setOnClickListener(v->{
+        findViewById(R.id.tvNetworkTime).setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, RoundActivity.class);
             startActivity(intent);
         });
@@ -314,14 +412,15 @@ public class MainActivity extends WDActivity {
 
     HDPopWindow popWindow;
     View viewPop;
-    @OnClick({R.id.tvSystemTime,R.id.swTest,R.id.ivBack,R.id.btCanvas2})
-    public void onMainClick(View view){
-        switch (view.getId()){
+
+    @OnClick({R.id.tvSystemTime, R.id.swTest, R.id.ivBack, R.id.btCanvas2})
+    public void onMainClick(View view) {
+        switch (view.getId()) {
             case R.id.tvSystemTime:
 //                intent(CrystalBallTrueActivity.class);
-                if (ContextCompat.checkSelfPermission(MainActivity.this,Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
-                    ActivityCompat.requestPermissions(MainActivity.this,new String[]{Manifest.permission.CAMERA},REQUEST_CAMERA);
-                }else {
+                if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA);
+                } else {
                     goScanQRCode();
                 }
                 break;
@@ -333,8 +432,8 @@ public class MainActivity extends WDActivity {
                 }*/
                 break;
             case R.id.ivBack:
-                if (viewPop == null){
-                    viewPop = LayoutInflater.from(this).inflate(R.layout.fl_first,null);
+                if (viewPop == null) {
+                    viewPop = LayoutInflater.from(this).inflate(R.layout.fl_first, null);
                     /*viewPop.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -342,17 +441,16 @@ public class MainActivity extends WDActivity {
                         }
                     });*/
                 }
-                if (popWindow==null){
+                if (popWindow == null) {
                     popWindow = new HDPopWindow.PopupWindowBuilder(this)
                             .setView(viewPop)
                             .create();
                 }
 
 
-
 //                viewPop.setOnClickListener(v -> popWindow.dismiss());
 
-                popWindow.showAsDropDown(lineChart,0,10);
+                popWindow.showAsDropDown(lineChart, 0, 10);
                 break;
             case R.id.btCanvas2:
                 intent(Canvas2Activity.class);
@@ -362,23 +460,35 @@ public class MainActivity extends WDActivity {
         }
     }
 
+    @Subscribe(sticky = true)
+    public void onEvent(CustomEvent event) {
+        switch (event.getTag()) {
+            case Constants.DOWNLOAD_PATH:
+                String path = (String) event.getContent();
+                installApk(path);
+                break;
+            default:
+                break;
+        }
+    }
+
     /**
-     *扫描二维码
+     * 扫描二维码
      */
     private void goScanQRCode() {
         Intent intent = new Intent(MainActivity.this, CaptureActivity.class);
-        startActivityForResult(intent,REQUEST_CAPTURE);
+        startActivityForResult(intent, REQUEST_CAPTURE);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_CAPTURE){
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED){
+        if (requestCode == REQUEST_CAPTURE) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 goScanQRCode();
-                Logger.d(TAG,"相机权限授予成功");
-            }else {
-                Toast.makeText(this,"权限拒绝",Toast.LENGTH_SHORT).show();
+                Logger.d(TAG, "相机权限授予成功");
+            } else {
+                Toast.makeText(this, "权限拒绝", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -386,22 +496,22 @@ public class MainActivity extends WDActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CAPTURE){
-            if (null!=data){
+        if (requestCode == REQUEST_CAPTURE) {
+            if (null != data) {
                 Bundle bundle = data.getExtras();
-                if (bundle == null){
+                if (bundle == null) {
                     return;
                 }
-                if (bundle.getInt(CodeUtils.RESULT_TYPE) == CodeUtils.RESULT_SUCCESS){
-                    Toast.makeText(this,bundle.getString(CodeUtils.RESULT_STRING),Toast.LENGTH_SHORT).show();
-                }else if (bundle.getInt(CodeUtils.RESULT_TYPE) == CodeUtils.RESULT_FAILED){
+                if (bundle.getInt(CodeUtils.RESULT_TYPE) == CodeUtils.RESULT_SUCCESS) {
+                    Toast.makeText(this, bundle.getString(CodeUtils.RESULT_STRING), Toast.LENGTH_SHORT).show();
+                } else if (bundle.getInt(CodeUtils.RESULT_TYPE) == CodeUtils.RESULT_FAILED) {
                     Toast.makeText(this, "解析二维码失败", Toast.LENGTH_LONG).show();
                 }
             }
         }
     }
 
-    private void setupWindowAnimations(){
+    private void setupWindowAnimations() {
 //        Fade slide = new Fade();
 //        slide.setDuration(1000);
 //        getWindow().setExitTransition(slide);
@@ -409,12 +519,13 @@ public class MainActivity extends WDActivity {
 
     /**
      * 获取版本名
+     *
      * @param context
      * @return
      */
-    public static String getVersionName(Context context){
+    public static String getVersionName(Context context) {
         try {
-            PackageInfo pi = context.getPackageManager().getPackageInfo(context.getPackageName(),0);
+            PackageInfo pi = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
             return pi.versionName;
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
@@ -424,12 +535,13 @@ public class MainActivity extends WDActivity {
 
     /**
      * 获取版本code
+     *
      * @param context
      * @return
      */
-    public static int getVersionCode(Context context){
+    public static int getVersionCode(Context context) {
         try {
-            PackageInfo pi = context.getPackageManager().getPackageInfo(context.getPackageName(),0);
+            PackageInfo pi = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
             return pi.versionCode;
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
@@ -439,49 +551,55 @@ public class MainActivity extends WDActivity {
 
     /**
      * 获取当前手机系统语言
+     *
      * @return 返回当前系统语言。例如：当前设置的是“中文-中国”，则返回“zh-CN”
      */
-    public static String getSystemLanguage(){
+    public static String getSystemLanguage() {
         return Locale.getDefault().getLanguage();
     }
 
     /**
      * 获取手机系统语言列表
+     *
      * @return 语言列表
      */
-    public static Locale[] getSystemLanguageList(){
+    public static Locale[] getSystemLanguageList() {
         return Locale.getAvailableLocales();
     }
 
     /**
      * 获取手机系统版本号
+     *
      * @return 系统版本号
      */
-    public static String getSystemVersion(){
+    public static String getSystemVersion() {
         return Build.VERSION.RELEASE;
     }
 
     /**
      * 获取手机型号
+     *
      * @return 手机型号
      */
-    public static String getSystemModel(){
+    public static String getSystemModel() {
         return Build.MODEL;
     }
 
     /**
      * 获取手机厂商
+     *
      * @return 手机厂商
      */
-    public static String getDeviceBrand(){
+    public static String getDeviceBrand() {
         return Build.BRAND;
     }
 
     /**
      * 获取国家网络授时时间
+     *
      * @return
      */
-    public static long getNetworkTime(){
+    public static long getNetworkTime() {
         String webUrl = "http://www.ntsc.ac.cn/";//中国科学院国家授时中心
         try {
             URL url = new URL(webUrl);

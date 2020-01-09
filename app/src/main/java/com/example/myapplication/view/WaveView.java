@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
 
@@ -66,8 +67,16 @@ public class WaveView extends View {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        screenWidth = widthMeasureSpec;
-        screenHeight = heightMeasureSpec;
+//        screenWidth = widthMeasureSpec;
+//        screenHeight = heightMeasureSpec;
+
+        screenHeight = getMeasuredHeight();
+        screenWidth = getMeasuredWidth();
+
+        waveLength = (int) Math.sqrt(screenWidth  * screenWidth + screenHeight * screenHeight);
+        Log.d("wave","screenWidth:" + screenWidth+ ", screenHeight:" + screenHeight);
+
+        Log.d("wave","length:" + waveLength);
     }
 
 
